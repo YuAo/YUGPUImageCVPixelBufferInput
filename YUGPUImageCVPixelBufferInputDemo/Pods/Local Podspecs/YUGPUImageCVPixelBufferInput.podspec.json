@@ -5,7 +5,7 @@
     "YuAo": "me@imyuao.com"
   },
   "homepage": "https://github.com/YuAo/YUGPUImageCVPixelBufferInput",
-  "summary": "YUGPUImageCVPixelBufferInput",
+  "summary": "CVPixelBuffer input for GPUImage",
   "license": {
     "type": "MIT",
     "file": "LICENSE"

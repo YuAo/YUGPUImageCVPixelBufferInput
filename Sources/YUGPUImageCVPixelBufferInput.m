@@ -26,10 +26,10 @@
 }
 
 - (void)processCVPixelBuffer:(CVPixelBufferRef)pixelBuffer {
-    [self processCVPixelBuffer:pixelBuffer withFrameTime:kCMTimeIndefinite];
+    [self processCVPixelBuffer:pixelBuffer frameTime:kCMTimeIndefinite];
 }
 
-- (void)processCVPixelBuffer:(CVPixelBufferRef)pixelBuffer withFrameTime:(CMTime)frameTime {
+- (void)processCVPixelBuffer:(CVPixelBufferRef)pixelBuffer frameTime:(CMTime)frameTime {
     size_t bufferWidth = CVPixelBufferGetWidth(pixelBuffer);
     size_t bufferHeight = CVPixelBufferGetHeight(pixelBuffer);
     

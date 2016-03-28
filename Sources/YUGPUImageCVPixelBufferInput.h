@@ -11,6 +11,8 @@
 
 @interface YUGPUImageCVPixelBufferInput : GPUImageOutput
 
-- (void)processCVPixelBuffer:(CVPixelBufferRef)pixelBuffer withFrameTime:(CMTime)frameTime;
+- (void)processCVPixelBuffer:(CVPixelBufferRef)pixelBuffer;
+
+- (void)processCVPixelBuffer:(CVPixelBufferRef)pixelBuffer frameTime:(CMTime)frameTime;
 
 @end

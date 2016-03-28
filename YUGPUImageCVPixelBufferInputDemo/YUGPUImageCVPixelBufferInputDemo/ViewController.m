@@ -54,7 +54,7 @@
     CFRetain(pixelBuffer);
     CFRetain(sampleBuffer);
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.pixelBufferInput processCVPixelBuffer:pixelBuffer withFrameTime:currentTime];
+        [self.pixelBufferInput processCVPixelBuffer:pixelBuffer frameTime:currentTime];
         CFRelease(pixelBuffer);
         CFRelease(sampleBuffer);
     });
