@@ -1,0 +1,6 @@
+framework module YUGPUImageCVPixelBufferInput {
+  umbrella header "YUGPUImageCVPixelBufferInput-umbrella.h"
+
+  export *
+  module * { export * }
+}

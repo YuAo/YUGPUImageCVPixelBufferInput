@@ -1,0 +1,6 @@
+framework module Pods_YUGPUImageCVPixelBufferInputDemo {
+  umbrella header "Pods-YUGPUImageCVPixelBufferInputDemo-umbrella.h"
+
+  export *
+  module * { export * }
+}
