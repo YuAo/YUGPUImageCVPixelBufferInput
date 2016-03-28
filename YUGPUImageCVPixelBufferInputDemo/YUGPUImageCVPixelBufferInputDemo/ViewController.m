@@ -41,11 +41,37 @@
     
     self.pixelBufferInput = [[YUGPUImageCVPixelBufferInput alloc] init];
     [self.pixelBufferInput addTarget:sepiaFilter];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:UIApplicationWillResignActiveNotification object:nil];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    [self.captureSession startRunning];
+    
+    if (!self.captureSession.isRunning) {
+        [self.captureSession startRunning];
+    }
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    
+    if (self.captureSession.isRunning) {
+        [self.captureSession stopRunning];
+    }
+}
+
+- (void)applicationWillResignActive:(NSNotification *)notification {
+    if (self.captureSession.isRunning) {
+        [self.captureSession stopRunning];
+    }
+}
+
+- (void)applicationDidBecomeActive:(NSNotification *)notification {
+    if (!self.captureSession.isRunning) {
+        [self.captureSession startRunning];
+    }
 }
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {

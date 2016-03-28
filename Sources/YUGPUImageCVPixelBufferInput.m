@@ -19,6 +19,7 @@
 - (void)dealloc {
     runSynchronouslyOnVideoProcessingQueue(^{
         [GPUImageContext useImageProcessingContext];
+        
         if (self.textureRef) {
             CFRelease(self.textureRef);
         }
@@ -35,6 +36,7 @@
     
     runSynchronouslyOnVideoProcessingQueue(^{
         [GPUImageContext useImageProcessingContext];
+        
         if (self.textureRef) {
             CFRelease(self.textureRef);
         }
@@ -66,7 +68,7 @@
         }
     });
     
-    runAsynchronouslyOnVideoProcessingQueue(^{
+    runSynchronouslyOnVideoProcessingQueue(^{
         for (id<GPUImageInput> currentTarget in targets)
         {
             NSInteger indexOfObject = [targets indexOfObject:currentTarget];
