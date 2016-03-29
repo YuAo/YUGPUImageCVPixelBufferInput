@@ -44,19 +44,19 @@
         }
         
         CVOpenGLESTextureRef textureRef = NULL;
-        CVReturn err = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
-                                                                    [[GPUImageContext sharedImageProcessingContext] coreVideoTextureCache],
-                                                                    pixelBuffer,
-                                                                    NULL,
-                                                                    GL_TEXTURE_2D,
-                                                                    GL_RGBA,
-                                                                    bufferWidth,
-                                                                    bufferHeight,
-                                                                    GL_BGRA,
-                                                                    GL_UNSIGNED_BYTE,
-                                                                    0,
-                                                                    &textureRef);
-        if (textureRef) {
+        CVReturn result = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
+                                                                       [[GPUImageContext sharedImageProcessingContext] coreVideoTextureCache],
+                                                                       pixelBuffer,
+                                                                       NULL,
+                                                                       GL_TEXTURE_2D,
+                                                                       GL_RGBA,
+                                                                       (GLsizei)bufferWidth,
+                                                                       (GLsizei)bufferHeight,
+                                                                       GL_BGRA,
+                                                                       GL_UNSIGNED_BYTE,
+                                                                       0,
+                                                                       &textureRef);
+        if (result == kCVReturnSuccess && textureRef) {
             self.textureRef = textureRef;
             
             glActiveTexture(GL_TEXTURE4);
@@ -67,6 +67,8 @@
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             
             outputFramebuffer = [[GPUImageFramebuffer alloc] initWithSize:CGSizeMake(bufferWidth, bufferHeight) overriddenTexture:CVOpenGLESTextureGetName(textureRef)];
+        } else {
+            NSAssert(NO, @"Cannot create texture.");
         }
     });
     
