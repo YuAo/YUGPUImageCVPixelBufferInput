@@ -8,7 +8,6 @@ Pod::Spec.new do |s|
   s.source       = {:git => 'https://github.com/YuAo/YUGPUImageCVPixelBufferInput.git', :tag => '0.1'}
   s.requires_arc = true
   s.ios.deployment_target = '8.0'
-  s.osx.deployment_target = '10.11'
   s.source_files = 'Sources/**/*.{h,m}'
   s.dependency 'GPUImage'
 end
