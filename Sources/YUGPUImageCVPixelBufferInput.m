@@ -12,9 +12,18 @@
 
 @property (nonatomic) CVOpenGLESTextureRef textureRef;
 
+@property (nonatomic, strong) dispatch_semaphore_t frameRenderingSemaphore;
+
 @end
 
 @implementation YUGPUImageCVPixelBufferInput
+
+- (instancetype)init {
+    if (self = [super init]) {
+        self.frameRenderingSemaphore = dispatch_semaphore_create(1);
+    }
+    return self;
+}
 
 - (void)dealloc {
     runSynchronouslyOnVideoProcessingQueue(^{
@@ -26,17 +35,26 @@
     });
 }
 
-- (void)processCVPixelBuffer:(CVPixelBufferRef)pixelBuffer {
-    [self processCVPixelBuffer:pixelBuffer frameTime:kCMTimeIndefinite];
+- (BOOL)processCVPixelBuffer:(CVPixelBufferRef)pixelBuffer {
+    return [self processCVPixelBuffer:pixelBuffer frameTime:kCMTimeIndefinite];
 }
 
-- (void)processCVPixelBuffer:(CVPixelBufferRef)pixelBuffer frameTime:(CMTime)frameTime {
+- (BOOL)processCVPixelBuffer:(CVPixelBufferRef)pixelBuffer frameTime:(CMTime)frameTime {
+    return [self processCVPixelBuffer:pixelBuffer frameTime:frameTime completion:nil];
+}
+
+- (BOOL)processCVPixelBuffer:(CVPixelBufferRef)pixelBuffer frameTime:(CMTime)frameTime completion:(void (^)(void))completion {
+    if (dispatch_semaphore_wait(self.frameRenderingSemaphore, DISPATCH_TIME_NOW) != 0) {
+        return NO;
+    }
+    
     NSAssert(CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_32BGRA, @"%@: only kCVPixelFormatType_32BGRA is supported currently.");
     
     size_t bufferWidth = CVPixelBufferGetWidth(pixelBuffer);
     size_t bufferHeight = CVPixelBufferGetHeight(pixelBuffer);
     
-    runSynchronouslyOnVideoProcessingQueue(^{
+    CFRetain(pixelBuffer);
+    runAsynchronouslyOnVideoProcessingQueue(^{
         [GPUImageContext useImageProcessingContext];
         
         if (self.textureRef) {
@@ -56,6 +74,9 @@
                                                                        GL_UNSIGNED_BYTE,
                                                                        0,
                                                                        &textureRef);
+        
+        NSAssert(result == kCVReturnSuccess, @"CVOpenGLESTextureCacheCreateTextureFromImage error: %@",@(result));
+
         if (result == kCVReturnSuccess && textureRef) {
             self.textureRef = textureRef;
             
@@ -67,22 +88,27 @@
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             
             outputFramebuffer = [[GPUImageFramebuffer alloc] initWithSize:CGSizeMake(bufferWidth, bufferHeight) overriddenTexture:CVOpenGLESTextureGetName(textureRef)];
-        } else {
-            NSAssert(NO, @"Cannot create texture.");
+            
+            for (id<GPUImageInput> currentTarget in targets) {
+                if ([currentTarget enabled]) {
+                    NSInteger indexOfObject = [targets indexOfObject:currentTarget];
+                    NSInteger targetTextureIndex = [[targetTextureIndices objectAtIndex:indexOfObject] integerValue];
+                    if (currentTarget != self.targetToIgnoreForUpdates) {
+                        [currentTarget setInputSize:CGSizeMake(bufferWidth, bufferHeight) atIndex:targetTextureIndex];
+                        [currentTarget setInputFramebuffer:outputFramebuffer atIndex:targetTextureIndex];
+                        [currentTarget newFrameReadyAtTime:frameTime atIndex:targetTextureIndex];
+                    } else {
+                        [currentTarget setInputFramebuffer:outputFramebuffer atIndex:targetTextureIndex];
+                    }
+                }
+            }
         }
+        
+        CFRelease(pixelBuffer);
+        dispatch_semaphore_signal(self.frameRenderingSemaphore);
     });
     
-    runSynchronouslyOnVideoProcessingQueue(^{
-        for (id<GPUImageInput> currentTarget in targets)
-        {
-            NSInteger indexOfObject = [targets indexOfObject:currentTarget];
-            NSInteger targetTextureIndex = [[targetTextureIndices objectAtIndex:indexOfObject] integerValue];
-            
-            [currentTarget setInputSize:CGSizeMake(bufferWidth, bufferHeight) atIndex:targetTextureIndex];
-            [currentTarget setInputFramebuffer:outputFramebuffer atIndex:targetTextureIndex];
-            [currentTarget newFrameReadyAtTime:frameTime atIndex:targetTextureIndex];
-        }
-    });
+    return YES;
 }
 
 @end

@@ -77,13 +77,7 @@
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
     CMTime currentTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
     CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-    CFRetain(pixelBuffer);
-    CFRetain(sampleBuffer);
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.pixelBufferInput processCVPixelBuffer:pixelBuffer frameTime:currentTime];
-        CFRelease(pixelBuffer);
-        CFRelease(sampleBuffer);
-    });
+    [self.pixelBufferInput processCVPixelBuffer:pixelBuffer frameTime:currentTime];
 }
 
 
