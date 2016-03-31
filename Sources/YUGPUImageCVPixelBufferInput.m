@@ -53,7 +53,9 @@
     size_t bufferWidth = CVPixelBufferGetWidth(pixelBuffer);
     size_t bufferHeight = CVPixelBufferGetHeight(pixelBuffer);
     
+    CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
     CFRetain(pixelBuffer);
+    
     runAsynchronouslyOnVideoProcessingQueue(^{
         [GPUImageContext useImageProcessingContext];
         
@@ -104,7 +106,9 @@
             }
         }
         
+        CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
         CFRelease(pixelBuffer);
+        
         dispatch_semaphore_signal(self.frameRenderingSemaphore);
     });
     
