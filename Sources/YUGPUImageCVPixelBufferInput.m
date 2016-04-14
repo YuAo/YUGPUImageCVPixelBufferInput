@@ -48,7 +48,7 @@
         return NO;
     }
     
-    NSAssert(CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_32BGRA, @"%@: only kCVPixelFormatType_32BGRA is supported currently.");
+    NSAssert(CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_32BGRA, @"%@: only kCVPixelFormatType_32BGRA is supported currently.",self);
     
     size_t bufferWidth = CVPixelBufferGetWidth(pixelBuffer);
     size_t bufferHeight = CVPixelBufferGetHeight(pixelBuffer);
