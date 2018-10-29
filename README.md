@@ -1,4 +1,5 @@
-# YUGPUImageCVPixelBufferInput
+# YUGPUImageCVPixelBufferInput [Deprecated]
+
 
 CVPixelBuffer input for [GPUImage](https://github.com/BradLarson/GPUImage), iOS
 
